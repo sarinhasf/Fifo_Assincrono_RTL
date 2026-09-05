@@ -39,15 +39,22 @@ Comando usado: `iverilog -g2012 -o fifo.out aFifo.v GrayCounter.v Synchronizer.v
 
 ## Sintese
 
-Rodar `genus -f genus_fifo_script.tcl` a partir da pasta do projeto (a pasta `outputs/` ja existe).
-Os relatorios necessarios para as respostas do item 4 saem em `outputs/`:
+Rodar `genus -f genus_fifo_script.tcl` a partir da pasta do projeto (as pastas `outputs/` e
+`reports/` ja existem). O script segue o mesmo padrao do `genus_script_nodft.tcl`.
 
-1. **Latches e sincronizadores** - `aFifo_instances.rpt` + log de elaboracao
-   (`set_db hdl_error_on_latch true` faz a sintese falhar caso algum latch seja inferido).
-   Registradores dos sincronizadores: `Sync_rPtr_to_WClk` (5 FF meta + 5 FF sync) e
-   `Sync_wPtr_to_RClk` (5 FF meta + 5 FF sync).
-2. **WNS / TNS por dominio** - `aFifo_timing_WClk.rpt`, `aFifo_timing_RClk.rpt`, `aFifo_qor.rpt`.
-3. **Classificacao do pior caminho** - `aFifo_in2reg.rpt`, `aFifo_reg2reg.rpt`, `aFifo_reg2out.rpt`.
+Saidas em `outputs/`: `aFifo_netlist.v`, `aFifo_sdc.sdc`, `aFifo_delays.sdf`.
+Reports em `reports/`: `report_timing.rpt`, `report_power.rpt`, `report_area.rpt`, `report_qor.rpt`.
+
+Para as respostas do item 4:
+
+1. **Latches e sincronizadores** - `set_db hdl_error_on_latch true` faz a sintese falhar caso
+   algum latch seja inferido; os registradores dos sincronizadores aparecem no netlist e no
+   `report_area.rpt`: `Sync_rPtr_to_WClk` e `Sync_wPtr_to_RClk` (5 FF metaestavel + 5 FF sync cada).
+2. **WNS / TNS por dominio** - `report_qor.rpt` traz WNS/TNS por grupo de caminho; o pior caminho
+   detalhado esta em `report_timing.rpt` (as linhas comentadas no fim do TCL geram um report por
+   dominio, WClk e RClk, se precisar separar).
+3. **Classificacao do pior caminho** (in2reg / reg2reg / reg2out) - ver o inicio e o fim do caminho
+   em `report_timing.rpt` (porta de entrada, registrador ou porta de saida).
 4. **Clocks assincronos** - `set_clock_groups -asynchronous` no SDC garante que nao ha analise de
-   setup entre WClk e RClk; `aFifo_timing_lint.rpt` (check_timing_intent) confirma que nao restam
-   caminhos funcionais sem constraint.
+   setup entre WClk e RClk; o `check_timing_intent` no inicio do script e o timing lint e nao deve
+   apontar caminhos funcionais sem constraint.
